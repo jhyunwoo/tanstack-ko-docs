@@ -1,0 +1,101 @@
+---
+id: overview
+title: 개요
+---
+
+TanStack Query(이전의 React Query)는 종종 웹 애플리케이션용 누락된 데이터 가져오기 라이브러리로 설명되지만 보다 기술적인 용어로 말하면 웹 애플리케이션에서 **서버 상태 가져오기, 캐싱, 동기화 및 업데이트**를 쉽게 만들어 줍니다.
+
+## 동기 부여
+
+대부분의 핵심 웹 프레임워크는 전체적인 방식으로 데이터를 가져오거나 업데이트하는 독선적인 방식을 제공하지 **않습니다**. 이 때문에 개발자는 데이터 가져오기에 대한 엄격한 의견을 캡슐화하는 메타 프레임워크를 구축하거나 데이터를 가져오는 자신만의 방법을 고안하게 됩니다. 이는 일반적으로 구성 요소 기반 상태와 부작용을 함께 엮거나 보다 일반적인 목적의 상태 관리 라이브러리를 사용하여 앱 전체에 비동기 데이터를 저장하고 제공하는 것을 의미합니다.
+
+대부분의 기존 상태 관리 라이브러리는 클라이언트 상태 작업에 적합하지만 **비동기 또는 서버 상태 작업에는 그다지 적합하지 않습니다**. **서버 상태가 전혀 다르기 때문입니다**. 우선 서버 상태는 다음과 같습니다.
+
+- 귀하가 통제하거나 소유할 수 없는 위치에 원격으로 지속됩니다.
+- 가져오기 및 업데이트를 위한 비동기 API가 필요합니다.
+- 공유 소유권을 암시하며 귀하도 모르게 다른 사람이 변경할 수 있습니다.
+- 주의하지 않으면 애플리케이션이 "구식"이 될 수 있습니다.
+
+애플리케이션에서 서버 상태의 특성을 파악하고 나면 **더 많은 문제가 발생하게 됩니다**. 예를 들면 다음과 같습니다.
+
+- 캐싱... (아마도 프로그래밍에서 가장 어려운 일)
+- 동일한 데이터에 대한 여러 요청을 단일 요청으로 중복 제거
+- 백그라운드에서 "오래된" 데이터 업데이트
+- 데이터가 "오래된" 시기를 파악
+- 업데이트된 데이터를 최대한 빠르게 반영
+- 페이지 매김 및 지연 로딩 데이터와 같은 성능 최적화
+- 서버 상태의 메모리 및 가비지 수집 관리
+- 구조적 공유를 통해 query 결과를 메모합니다.
+
+해당 목록에 압도되지 않는다면 이는 아마도 모든 서버 상태 문제를 이미 해결했으며 상을 받을 자격이 있다는 의미일 것입니다. 그러나 귀하가 대다수의 사람들과 같다면 아직 이러한 과제의 전부 또는 대부분을 해결하지 못했을 것이며 우리는 단지 표면적인 부분에 불과합니다!
+
+TanStack Query는 ​​서버 상태 관리를 위한 _최고의_ 라이브러리 중 하나입니다. 놀라울 정도로 잘 작동하며 별도의 구성 없이 바로 사용할 수 있으며 애플리케이션이 성장함에 따라 원하는 대로 사용자 정의할 수 있습니다**.
+
+TanStack Query를 사용하면 _서버 상태_의 까다로운 문제와 장애물을 극복하고 앱 데이터가 사용자를 제어하기 전에 제어할 수 있습니다.
+
+보다 기술적인 측면에서 TanStack Query는 ​​다음과 같은 작업을 수행할 가능성이 높습니다.
+
+- 애플리케이션에서 **많은** 복잡하고 오해된 코드 줄을 제거하고 TanStack Query 논리 몇 줄로 대체할 수 있도록 도와줍니다.
+- 새로운 서버 상태 데이터 소스 연결에 대한 걱정 없이 애플리케이션을 더욱 쉽게 유지 관리하고 새로운 기능을 구축하기 쉽게 만듭니다.
+- 애플리케이션의 속도와 반응성이 이전보다 더 빨라진 느낌을 주어 최종 사용자에게 직접적인 영향을 미칩니다.
+- 잠재적으로 대역폭을 절약하고 메모리 성능을 높이는 데 도움이 됩니다.
+
+[//]: # 'Example'
+
+## 얘기는 이쯤하고 코드를 보여주세요!
+
+아래 예에서는 TanStack Query GitHub 프로젝트 자체에 대한 GitHub 통계를 가져오는 데 사용되는 가장 기본적이고 간단한 형태의 TanStack Query를 볼 수 있습니다.
+
+[StackBlitz에서 열기](https://stackblitz.com/github/TanStack/query/tree/main/examples/react/simple)
+
+```tsx
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from '@tanstack/react-query'
+
+const queryClient = new QueryClient()
+
+export default function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Example />
+    </QueryClientProvider>
+  )
+}
+
+function Example() {
+  const { isPending, error, data } = useQuery({
+    queryKey: ['repoData'],
+    queryFn: () =>
+      fetch('https://api.github.com/repos/TanStack/query').then((res) =>
+        res.json(),
+      ),
+  })
+
+  if (isPending) return 'Loading...'
+
+  if (error) return 'An error has occurred: ' + error.message
+
+  return (
+    <div>
+      <h1>{data.name}</h1>
+      <p>{data.description}</p>
+      <strong>👀 {data.subscribers_count}</strong>{' '}
+      <strong>✨ {data.stargazers_count}</strong>{' '}
+      <strong>🍴 {data.forks_count}</strong>
+    </div>
+  )
+}
+```
+[//]: # 'Example'
+[//]: # 'Materials'
+
+## 당신이 나한테 그런 말을 했으니 이제 어떻게 됩니까?
+
+- 공식 [TanStack Query 과정](https://query.gg?s=tanstack) 수강을 고려해보세요(또는 팀 전체를 위해 구매하세요!)
+- 놀랍도록 철저한 [연습 가이드](installation.md) 및 [useQuery](reference/useQuery.md)를 통해 자신의 속도에 맞춰 TanStack Query를 알아보세요.
+- [React Query를 원하는 이유](https://tkdodo.eu/blog/why-you-want-react-query) 기사를 참조하세요.
+
+[//]: # 'Materials'
